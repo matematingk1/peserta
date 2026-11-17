@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QUIZ CERCER — Peserta</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
+body{font-family:Poppins,sans-serif}
+.pulse{animation:pulse 1.4s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 #ef444477}70%{box-shadow:0 0 0 18px #ef444400}100%{box-shadow:0 0 0 0 #ef444400}}
+button:disabled{opacity:.45;cursor:not--allowed}
+</style>
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-100">
+<header class="sticky top-0 z-20 border-b border-slate-700 bg-slate-900/90 backdrop-blur px-4 py-4">
+ <div class="mx-auto flex max-w-3xl items-center justify-between">
+  <div class="flex items-center gap-3"><div class="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 font-black">QC</div><div><h1 class="font-extrabold tracking-wide text-indigo-300">QUIZ CERCER</h1><p class="text-xs text-slate-400">Portal Peserta Cerdas Cermat</p></div></div>
+  <span id="connection" class="rounded-full bg-slate-800 px-3 py-1 text-xs text-amber-300"><i class="fa-solid fa-circle mr-1 text-[8px]"></i>Belum terhubung</span>
+ </div>
+</header>
+<main class="mx-auto flex min-h-[calc(100vh-72px)] max-w-3xl flex-col justify-center p-4">
+ <section id="joinPanel" class="rounded-3xl border border-slate-700 bg-slate-900 p-6 shadow-2xl sm:p-9">
+  <div class="mb-6 text-center"><div class="mb-3 inline-grid h-16 w-16 place-items-center rounded-2xl border border-emerald-400/20 bg-emerald-400/10 text-3xl text-emerald-300"><i class="fa-solid fa-users"></i></div><h2 class="text-2xl font-extrabold">Gabung Ruangan Kuis</h2><p class="mt-2 text-sm text-slate-400">Masukkan kode room dan nama regu yang diberikan host/guru.</p></div>
+  <form id="joinForm" class="space-y-4">
+   <label class="block"><span class="mb-1.5 block text-sm text-slate-300">Kode Room</span><input id="roomCode" required maxlength="20" autocomplete="off" placeholder="Contoh: QC-8921" class="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-center font-mono text-lg font-bold uppercase tracking-widest text-indigo-300 outline-none focus:border-indigo-500"></label>
+   <label class="block"><span class="mb-1.5 block text-sm text-slate-300">Nama Regu</span><input id="teamName" required maxlength="40" autocomplete="organization" placeholder="Contoh: Regu Alpha" class="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-center font-semibold outline-none focus:border-indigo-500"></label>
+   <button id="joinBtn" class="w-full rounded-xl bg-emerald-600 px-4 py-3.5 font-bold transition hover:bg-emerald-500"><i class="fa-solid fa-right-to-bracket mr-2"></i>Masuk Ruangan Kuis</button>
+  </form>
+  <p id="joinMessage" class="mt-4 hidden rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-center text-sm text-rose-300"></p>
+  <p class="mt-5 text-center text-xs text-slate-500">Pastikan kode room sama dengan kode yang tampil pada layar host.</p>
+ </section>
+
+ <section id="arena" class="hidden space-y-4">
+  <div class="grid grid-cols-2 gap-3">
+   <div class="rounded-2xl border border-slate-700 bg-slate-900 p-4"><p class="text-xs text-slate-400">Nama Regu</p><p id="myTeam" class="mt-1 truncate font-bold text-emerald-300">—</p></div>
+   <div class="rounded-2xl border border-slate-700 bg-slate-900 p-4 text-right"><p class="text-xs text-slate-400">Skor Regu</p><p class="mt-1 text-2xl font-extrabold text-amber-300"><span id="myScore">0</span> <span class="text-sm">pts</span></p></div>
+  </div>
+  <div class="rounded-3xl border border-slate-700 bg-slate-900 p-5 text-center shadow-xl sm:p-8">
+   <div class="mb-5 flex items-center justify-between gap-3"><span class="rounded-full bg-indigo-500/10 px-3 py-1 text-xs font-bold text-indigo-300">ROOM <span id="activeRoom">—</span></span><span id="questionNumber" class="text-xs text-slate-400">Menunggu soal</span></div>
+   <p class="text-xs font-semibold uppercase tracking-[.2em] text-slate-500">Pertanyaan dari Host</p>
+   <h2 id="questionText" class="mt-3 min-h-20 text-xl font-bold leading-relaxed sm:text-2xl">Menunggu guru memulai kuis…</h2>
+   <div class="my-7 flex flex-col items-center">
+    <button id="buzzer" type="button" disabled class="pulse grid h-52 w-52 place-content-center rounded-full border-[10px] border-rose-800/70 bg-gradient-to-br from-rose-500 to-red-700 text-white shadow-2xl shadow-rose-900/50 transition active:scale-95 sm:h-60 sm:w-60" aria-label="Tekan bel">
+     <i class="fa-solid fa-bell mb-2 text-5xl"></i><span class="text-2xl font-extrabold tracking-wider">TEKAN BEL</span>
+    </button>
+    <p id="buzzerNote" class="mt-4 text-sm text-slate-400">Bel akan aktif setelah regu terhubung.</p>
+   </div>
+   <div class="rounded-xl border border-slate-700 bg-slate-950 p-4 text-left"><p class="mb-1 text-xs font-semibold text-slate-500">STATUS</p><p id="statusText" class="text-sm text-slate-300">Terhubung ke ruangan.</p></div>
+  </div>
+  <div class="flex items-center justify-between gap-3 px-1 text-xs text-slate-500"><span id="deviceInfo">Perangkat: —</span><button id="leaveBtn" class="text-rose-300 hover:text-rose-200">Keluar dari room</button></div>
+ </section>
+ <p class="mt-6 text-center text-xs text-slate-600">QUIZ CERCER • Gunakan satu perangkat untuk setiap regu.</p>
+</main>
+
+<div id="notice" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 p-4">
+ <div class="w-full max-w-sm rounded-2xl border border-slate-700 bg-slate-900 p-6 text-center shadow-2xl"><i class="fa-solid fa-circle-exclamation mb-3 text-3xl text-amber-300"></i><h3 id="noticeTitle" class="text-lg font-bold">Informasi</h3><p id="noticeBody" class="mt-2 text-sm text-slate-300"></p><button id="noticeClose" class="mt-5 w-full rounded-xl bg-indigo-600 py-3 font-semibold">Mengerti</button></div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import { getFirestore, doc, getDoc, updateDoc, onSnapshot, runTransaction } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+/*
+ PENTING — SAMAKAN KONFIGURASI DENGAN APLIKASI HOST:
+ 1. Jika aplikasi host berjalan di lingkungan yang menyediakan __firebase_config
+    dan __app_id, file ini akan menggunakan konfigurasi tersebut otomatis.
+ 2. Jika dihosting sendiri, isi objek FIREBASE_CONFIG dengan konfigurasi Web App
+    dari Firebase Console > Project settings > Your apps.
+ 3. APP_ID harus sama persis dengan nilai __app_id pada aplikasi host.
+*/
+const FIREBASE_CONFIG = null; // Ganti null dengan objek konfigurasi Firebase milik proyek Anda.
+const APP_ID_OVERRIDE = "";   // Isi hanya jika APP_ID host berbeda dari "quiz-cercer-default-app".
+const rawConfig = typeof __firebase_config !== "undefined" ? JSON.parse(__firebase_config) : FIREBASE_CONFIG;
+const appIdRaw = typeof __app_id !== "undefined" ? __app_id : (APP_ID_OVERRIDE || "quiz-cercer-default-app");
+const appId = String(appIdRaw).replace(/[^a-zA-Z0-9_-]/g, "_");
+
+const $ = id => document.getElementById(id);
+let db, auth, roomCode = "", participantId = "", teamName = "", unsubscribeRoom = null;
+let buzzerWinner = null, joined = false, audioContext = null;
+
+function showNotice(title, body) { $("noticeTitle").textContent = title; $("noticeBody").textContent = body; $("notice").classList.remove("hidden"); $("notice").classList.add("flex"); }
+$("noticeClose").addEventListener("click", () => { $("notice").classList.add("hidden"); $("notice").classList.remove("flex"); });
+function deviceLabel() {
+ const ua = navigator.userAgent || "";
+ const browser = /Edg\//.test(ua) ? "Edge" : /Firefox\//.test(ua) ? "Firefox" : /Chrome\//.test(ua) ? "Chrome" : /Safari\//.test(ua) ? "Safari" : "Browser";
+ const device = /Android/i.test(ua) ? "Android" : /iPhone|iPad|iPod/i.test(ua) ? "iPhone/iPad" : /Windows/i.test(ua) ? "Windows" : /Macintosh|Mac OS/i.test(ua) ? "Mac" : /Linux/i.test(ua) ? "Linux" : "Perangkat";
+ return `${device} • ${browser}`;
+}
+function getRoomRef(code) { return doc(db, "artifacts", appId, "public", "data", "rooms", code); }
+function setConnection(ok, label) {
+ $("connection").innerHTML = `<i class="fa-solid fa-circle mr-1 text-[8px]"></i>${label}`;
+ $("connection").className = `rounded-full px-3 py-1 text-xs ${ok ? "bg-emerald-500/10 text-emerald-300" : "bg-rose-500/10 text-rose-300"}`;
+}
+function playBell() {
+ try {
+  audioContext ||= new (window.AudioContext || window.webkitAudioContext)();
+  if (audioContext.state === "suspended") audioContext.resume();
+  [880, 1174.66].forEach((freq, i) => {
+   const osc = audioContext.createOscillator(), gain = audioContext.createGain();
+   osc.type = "sine"; osc.frequency.value = freq;
+   gain.gain.setValueAtTime(.25, audioContext.currentTime + i * .11);
+   gain.gain.exponentialRampToValueAtTime(.01, audioContext.currentTime + i * .11 + .35);
+   osc.connect(gain); gain.connect(audioContext.destination);
+   osc.start(audioContext.currentTime + i * .11); osc.stop(audioContext.currentTime + i * .11 + .36);
+  });
+ } catch(e) { console.warn(e); }
+}
+function renderBuzzer(data) {
+ const btn = $("buzzer"), note = $("buzzerNote");
+ buzzerWinner = data.buzzerWinner || null;
+ if (buzzerWinner) {
+  btn.disabled = true; btn.classList.remove("pulse");
+  note.textContent = buzzerWinner === participantId ? "🔔 Regu Anda berhasil menekan bel pertama!" : `Bel dikunci oleh ${data.buzzerWinnerName || "regu lain"}. Tunggu host mereset bel.`;
+  note.className = `mt-4 text-sm font-bold ${buzzerWinner === participantId ? "text-emerald-300" : "text-rose-300"}`;
+ } else {
+  btn.disabled = false; btn.classList.add("pulse");
+  note.textContent = "Bel terbuka! Tekan jika regu Anda siap menjawab.";
+  note.className = "mt-4 text-sm text-emerald-300";
+ }
+}
+function listenRoom() {
+ if (unsubscribeRoom) unsubscribeRoom();
+ unsubscribeRoom = onSnapshot(getRoomRef(roomCode), snap => {
+  if (!snap.exists()) { setConnection(false, "Room tidak ditemukan"); return; }
+  const data = snap.data();
+  setConnection(true, "Terhubung");
+  const questions = data.questions || [], idx = Number(data.currentQuestionIndex || 0);
+  $("questionNumber").textContent = questions.length ? `Soal ${Math.min(idx + 1, questions.length)} / ${questions.length}` : "Belum ada soal";
+  $("questionText").textContent = questions[idx]?.text || "Menunggu guru memulai soal…";
+  const me = (data.participants || []).find(p => p.id === participantId);
+  if (!me) {
+   joined = false; unsubscribeRoom?.(); unsubscribeRoom = null;
+   $("statusText").textContent = "Regu Anda tidak lagi terdaftar pada room ini.";
+   showNotice("Koneksi regu terputus", "Regu Anda tidak ditemukan dalam daftar peserta. Silakan masuk kembali dengan kode room.");
+   $("arena").classList.add("hidden"); $("joinPanel").classList.remove("hidden");
+   return;
+  }
+  $("myScore").textContent = Number(me.score || 0);
+  renderBuzzer(data);
+  $("statusText").textContent = data.buzzerWinner ? (data.buzzerWinner === participantId ? "Regu Anda mendapat kesempatan menjawab." : `Bel telah ditekan oleh ${data.buzzerWinnerName || "regu lain"}.`) : "Menunggu regu yang menekan bel.";
+ }, err => {
+  console.error(err); setConnection(false, "Koneksi terganggu");
+  $("statusText").textContent = "Koneksi realtime terputus. Periksa internet Anda.";
+ });
+}
+async function joinRoom(code, name) {
+ const ref = getRoomRef(code), snap = await getDoc(ref);
+ if (!snap.exists()) throw new Error("ROOM_NOT_FOUND");
+ const data = snap.data(), list = data.participants || [];
+ if (list.some(p => p.name.toLowerCase() === name.toLowerCase())) throw new Error("DUPLICATE_TEAM");
+ if (list.length >= (data.targetParticipants || 6)) throw new Error("ROOM_FULL");
+ participantId = "p_" + (crypto.randomUUID ? crypto.randomUUID().replaceAll("-", "").slice(0, 12) : Math.random().toString(36).slice(2, 14));
+ teamName = name;
+ const member = { id: participantId, name, score: 0, deviceLabel: deviceLabel(), joinedAt: Date.now() };
+ await updateDoc(ref, { participants: [...list, member] });
+ roomCode = code; joined = true;
+ $("myTeam").textContent = teamName; $("activeRoom").textContent = roomCode; $("deviceInfo").textContent = `Perangkat: ${member.deviceLabel}`;
+ $("joinPanel").classList.add("hidden"); $("arena").classList.remove("hidden");
+ listenRoom();
+}
+$("joinForm").addEventListener("submit", async e => {
+ e.preventDefault();
+ const code = $("roomCode").value.trim().toUpperCase(), name = $("teamName").value.trim();
+ $("joinMessage").classList.add("hidden"); $("joinBtn").disabled = true; $("joinBtn").textContent = "Menghubungkan…";
+ try {
+  if (!db || !auth?.currentUser) throw new Error("FIREBASE_NOT_READY");
+  await joinRoom(code, name);
+ } catch(err) {
+  console.error(err);
+  const messages = { ROOM_NOT_FOUND: "Kode room tidak ditemukan. Periksa kembali kode dari host.", ROOM_FULL: "Room sudah penuh.", DUPLICATE_TEAM: "Nama regu tersebut sudah terdaftar di room ini.", FIREBASE_NOT_READY: "Firebase belum siap. Periksa konfigurasi aplikasi." };
+  $("joinMessage").textContent = messages[err.message] || "Gagal masuk. Periksa koneksi internet dan aturan akses Firebase.";
+  $("joinMessage").classList.remove("hidden");
+ } finally { $("joinBtn").disabled = false; $("joinBtn").innerHTML = '<i class="fa-solid fa-right-to-bracket mr-2"></i>Masuk Ruangan Kuis'; }
+});
+$("buzzer").addEventListener("click", async () => {
+ if (!joined || buzzerWinner) return;
+ $("buzzer").disabled = true;
+ try {
+  const ref = getRoomRef(roomCode);
+  const result = await runTransaction(db, async tx => {
+   const snap = await tx.get(ref);
+   if (!snap.exists()) throw new Error("ROOM_NOT_FOUND");
+   const data = snap.data();
+   if (data.buzzerWinner) return { accepted: false, winner: data.buzzerWinner, name: data.buzzerWinnerName || "regu lain" };
+   const member = (data.participants || []).find(p => p.id === participantId);
+   if (!member) throw new Error("NOT_REGISTERED");
+   tx.update(ref, { buzzerWinner: participantId, buzzerWinnerName: teamName, buzzerPressedAt: Date.now() });
+   return { accepted: true };
+  });
+  if (!result.accepted) {
+   buzzerWinner = result.winner;
+   $("buzzerNote").textContent = `Bel lebih dahulu ditekan oleh ${result.name}.`;
+   $("buzzerNote").className = "mt-4 text-sm font-bold text-rose-300";
+  } else { playBell(); }
+ } catch(err) {
+  console.error(err); showNotice("Bel belum terkirim", "Tekanan bel gagal dikirim. Periksa koneksi internet lalu coba kembali.");
+  $("buzzer").disabled = false;
+ }
+});
+$("leaveBtn").addEventListener("click", async () => {
+ if (!joined) return;
+ if (!confirm("Keluar dari ruangan kuis?")) return;
+ try {
+  const ref = getRoomRef(roomCode);
+  await runTransaction(db, async tx => {
+   const snap = await tx.get(ref); if (!snap.exists()) return;
+   const list = (snap.data().participants || []).filter(p => p.id !== participantId);
+   tx.update(ref, { participants: list });
+  });
+ } catch(e) { console.warn("Gagal memperbarui daftar peserta:", e); }
+ unsubscribeRoom?.(); unsubscribeRoom = null; joined = false; participantId = "";
+ $("arena").classList.add("hidden"); $("joinPanel").classList.remove("hidden");
+ setConnection(true, "Keluar dari room");
+});
+async function init() {
+ try {
+  if (!rawConfig?.projectId) {
+   setConnection(false, "Konfigurasi diperlukan");
+   $("joinMessage").textContent = "Firebase belum dikonfigurasi. Isi FIREBASE_CONFIG dan APP_ID_OVERRIDE pada bagian script sesuai aplikasi host.";
+   $("joinMessage").classList.remove("hidden");
+   return;
+  }
+  const app = initializeApp(rawConfig), authInstance = getAuth(app);
+  db = getFirestore(app); auth = authInstance;
+  await signInAnonymously(auth);
+  setConnection(true, "Siap bergabung");
+ } catch(e) {
+  console.error(e); setConnection(false, "Firebase gagal");
+  $("joinMessage").textContent = "Gagal menghubungkan ke Firebase. Pastikan konfigurasi benar dan Anonymous Authentication diaktifkan.";
+  $("joinMessage").classList.remove("hidden");
+ }
+}
+init();
+</script>
+</body>
+</html>
